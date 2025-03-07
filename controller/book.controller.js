@@ -3,6 +3,8 @@ const {
   getAllBooksService,
   getBookService,
   createBookService,
+  updateBookService,
+  deleteBookService,
 } = require("../services/book.service");
 
 async function getAllBooks(req, res) {
@@ -105,22 +107,60 @@ async function updateBook(req, res) {
       return res.status(400).json({ error: "Invalid Book ID" });
     }
 
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({ error: "Body is empty" });
+    }
+
     const authors = await getAuthorService(authorId);
 
     if (authors.length == 0) {
       return res.status(404).json({ error: "Author does not exist" });
     }
 
-    const books = await getBookService(authorId, bookId);
+    const { title, publishedDate } = req.body;
 
-    if (books.length == 0) {
+    const result = await updateBookService(title, publishedDate, authorId, bookId);
+
+    if (result.rowCount == 0) {
       return res.status(404).json({ error: "Book does not exist" });
     }
 
-    return res.status(200).json(books);
+    return res.status(200).send("Book Updated Successfully!");
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ error: "Failed to retrieve book" });
+    return res.status(500).json({ error: "Failed to update book" });
+  }
+}
+
+async function deleteBook(req, res) {
+  try {
+    const authorId = req.params.authorId;
+    const bookId = req.params.bookId;
+
+    if (isNaN(authorId)) {
+      return res.status(400).json({ error: "Invalid Author ID" });
+    }
+
+    if (isNaN(bookId)) {
+      return res.status(400).json({ error: "Invalid Book ID" });
+    }
+
+    const authors = await getAuthorService(authorId);
+
+    if (authors.length == 0) {
+      return res.status(404).json({ error: "Author does not exist" });
+    }
+
+    const result = await deleteBookService(authorId, bookId);
+
+    if (result.rowCount == 0) {
+      return res.status(404).json({ error: "Book does not exist" });
+    }
+
+    return res.status(200).send("Book Deleted Successfully!");
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: "Failed to delete book" });
   }
 }
 
@@ -128,4 +168,6 @@ module.exports = {
   getAllBooks,
   getBook,
   createBook,
+  updateBook,
+  deleteBook
 };

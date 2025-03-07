@@ -33,8 +33,33 @@ async function createBookService(title, authorId, publishedDate) {
   }
 }
 
+async function updateBookService(title, publishedDate, authorId, bookId) {
+  try {
+    const query = queryList.UPDATE_BOOK;
+    const values = [title, publishedDate, authorId, bookId];
+    const result = await pool.query(query, values);
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function deleteBookService(authorId, bookId) {
+  try {
+    const query = queryList.DELETE_BOOK;
+    const values = [authorId, bookId];
+    const result = await pool.query(query, values);
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+
+
 module.exports = {
   getAllBooksService,
   getBookService,
   createBookService,
+  updateBookService,
+  deleteBookService
 };
